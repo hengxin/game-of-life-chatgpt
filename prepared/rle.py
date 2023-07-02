@@ -39,4 +39,4 @@ def rle_to_txt(rle_filename):
         txt_file.write('\n'.join(txt_lines))
 
 if __name__ == '__main__':
-    rle_to_txt("1beacon.rle")
+    rle_to_txt("../1beacon.rle")

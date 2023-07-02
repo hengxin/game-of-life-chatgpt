@@ -75,7 +75,7 @@ def update(data):
     return [mat]
 
 # Load the initial configuration from a file
-filename = "1beacon.rle"
+filename = "../1beacon.rle"
 grid = load_rle(filename)
 
 fig, ax = plt.subplots()

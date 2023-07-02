@@ -76,7 +76,7 @@ def update(data):
     return [mat]
 
 # Directory containing the RLE files
-directory = "patterns"
+directory = "../patterns"
 
 # Iterate over each RLE file in the directory
 for filename in os.listdir(directory):
