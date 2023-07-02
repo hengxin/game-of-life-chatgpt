@@ -1,4 +1,5 @@
 import pygame
+import sys  # Add this import at the top of your file
 import time
 
 # Grid size
@@ -22,33 +23,43 @@ pygame.init()
 WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 # Initial grid state
-grid = [[0 for _ in range(WIDTH)] for _ in range(HEIGHT)]
+grid = set()
 
 # Glider pattern
 glider_pattern = [(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)]
 for x, y in glider_pattern:
-    grid[y][x] = 1
+    grid.add((x, y))
 
 def draw_grid():
-    for y in range(HEIGHT):
-        for x in range(WIDTH):
-            rect = pygame.Rect(x*CELL_WIDTH, y*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT)
-            pygame.draw.rect(WINDOW, CELL_COLOR if grid[y][x] else BACKGROUND_COLOR, rect)
+    if not grid:
+        return
+
+    min_x = min(x for x, y in grid)
+    max_x = max(x for x, y in grid)
+    min_y = min(y for x, y in grid)
+    max_y = max(y for x, y in grid)
+
+    grid_width = max_x - min_x + 1
+    grid_height = max_y - min_y + 1
+
+    cell_width = WINDOW_WIDTH // grid_width
+    cell_height = WINDOW_HEIGHT // grid_height
+
+    for x, y in grid:
+        rect = pygame.Rect((x-min_x)*cell_width, (y-min_y)*cell_height, cell_width, cell_height)
+        pygame.draw.rect(WINDOW, CELL_COLOR, rect)
 
 def update_grid():
-    new_grid = [[0 for _ in range(WIDTH)] for _ in range(HEIGHT)]
-    for y in range(HEIGHT):
-        for x in range(WIDTH):
-            live_neighbors = 0
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    nx, ny = x + dx, y + dy
-                    if (dx != 0 or dy != 0) and (0 <= nx < WIDTH) and (0 <= ny < HEIGHT):
-                        live_neighbors += grid[ny][nx]
-            if grid[y][x] and live_neighbors in [2, 3]:
-                new_grid[y][x] = 1
-            elif not grid[y][x] and live_neighbors == 3:
-                new_grid[y][x] = 1
+    new_grid = set()
+    candidates = grid.union((x+dx, y+dy) for x, y in grid for dx in [-1, 0, 1] for dy in [-1, 0, 1])
+
+    for x, y in candidates:
+        live_neighbors = sum((nx, ny) in grid for nx in [x-1, x, x+1] for ny in [y-1, y, y+1] if (nx, ny) != (x, y))
+        if (x, y) in grid and live_neighbors in [2, 3]:
+            new_grid.add((x, y))
+        elif (x, y) not in grid and live_neighbors == 3:
+            new_grid.add((x, y))
+
     return new_grid
 
 while True:
@@ -60,4 +71,4 @@ while True:
     pygame.display.update()
 
     grid = update_grid()
-    time.sleep(0.1)
+    time.sleep(2)
